@@ -9,12 +9,12 @@ class Kelas extends Model
     protected $table = 'kelas';
     
     protected $fillable = [
-        'dosen_id', 
-        'nama_mk', 
-        'kode_kelas', 
-        'hari', 
-        'sks'
-    ];
+    'dosen_id', 
+    'nama_mk', 
+    'kode_kelas', 
+    'hari', 
+    'sks'
+];
 
     public function dosen() {
         return $this->belongsTo(Dosen::class);

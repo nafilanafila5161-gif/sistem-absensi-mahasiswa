@@ -18,11 +18,18 @@ public function user()
     // Menghubungkan kolom mahasiswa_id ke kolom id di tabel users
     return $this->belongsTo(User::class, 'mahasiswa_id', 'id');
 }
-    public function sesi() {
-        return $this->belongsTo(SesiAbsensi::class);
-    }
-
+    // Di dalam model Absensi
+public function sesi()
+{
+    // Gunakan 'sesi_id' sesuai yang ada di database Anda
+    return $this->belongsTo(SesiAbsensi::class, 'sesi_id');
+}
     public function mahasiswa() {
         return $this->belongsTo(Mahasiswa::class);
     }
+
+    public function kelas()
+{
+    return $this->belongsTo(Kelas::class, 'kelas_id');
+}
 }

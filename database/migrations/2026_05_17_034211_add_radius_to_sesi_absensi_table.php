@@ -9,11 +9,10 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+   public function up()
 {
-    Schema::table('mahasiswa', function (Blueprint $table) {
-        // Ganti 'prodi' menjadi 'nama' atau 'nim' yang sudah ada di tabel Anda
-        $table->year('angkatan')->after('nama')->nullable();
+    Schema::table('sesi_absensi', function (Blueprint $table) {
+        $table->integer('radius')->default(50)->after('longitude');
     });
 }
 
@@ -22,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('mahasiswa', function (Blueprint $table) {
+        Schema::table('sesi_absensi', function (Blueprint $table) {
             //
         });
     }

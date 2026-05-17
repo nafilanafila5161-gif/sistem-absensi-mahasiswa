@@ -2,9 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Dosen\DosenController;
+use App\Http\Controllers\Mahasiswa\MahasiswaController; // Pastikan namespace ini benar
+use App\Http\Controllers\Dosen\DosenController; // Pastikan namespace ini benar
 
-// --- AKSES PUBLIK (Login & Forgot Password) ---
+// --- AKSES PUBLIK ---
 Route::get('/', function () { 
     return view('auth.login'); 
 })->name('login');
@@ -21,14 +22,19 @@ Route::middleware(['auth'])->group(function () {
     
     Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
 
-    // --- AREA PROFIL & SETTINGS (Rute Umum) ---
+    // --- AREA PROFIL & SETTINGS (Umum) ---
     Route::get('/profile', [AdminController::class, 'profile'])->name('profile.show');
-    Route::post('/profile/update', [AdminController::class, 'updateProfile'])->name('profile.update');
+   
+    // Rute untuk buka halaman edit (GET)
+Route::get('/profile/edit', [AdminController::class, 'editProfile'])->name('profile.edit');
+
+// Rute untuk simpan data (POST)
+Route::post('/profile/update', [AdminController::class, 'updateProfile'])->name('profile.update');
     
-    // Menyatukan rute settings agar tidak error di image_639dc6 & image_638e84
-    Route::get('/settings', [AdminController::class, 'settingsShow'])->name('settings.show');
-    // Alias 'settings' untuk mendukung {{ route('settings') }}
-    Route::get('/settings/alias', [AdminController::class, 'settingsShow'])->name('settings');
+    
+    // Settings (Menyatukan alias agar tidak error)
+    Route::get('/settings', [AdminController::class, 'settingsShow'])->name('settings');
+    Route::get('/settings/show', [AdminController::class, 'settingsShow'])->name('settings.show');
 
 
     // --- AREA ADMIN ---
@@ -37,47 +43,45 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/users', [AdminController::class, 'manageUsers'])->name('users.index');
         Route::post('/users/store', [AdminController::class, 'storeUser'])->name('users.store'); 
         Route::delete('/users/{id}', [AdminController::class, 'destroy'])->name('users.destroy');
+        // Tambahkan ekspor untuk admin jika diperlukan di masa depan
+        Route::get('/rekap/export', [AdminController::class, 'exportExcelAdmin'])->name('rekap.export');
     });
 
-
-    // --- AREA DOSEN ---
-    Route::prefix('dosen')->name('dosen.')->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
-        Route::get('/kelas/create', [AdminController::class, 'createKelas'])->name('kelas.create');
-        Route::post('/kelas/store', [DosenController::class, 'storeKelas'])->name('kelas.store');
-        Route::get('/rekap', [AdminController::class, 'rekapDosen'])->name('rekap');
-     // Pastikan di dalam group 'dosen'
-Route::get('/absensi/pantau', [AdminController::class, 'pantauAbsensi'])->name('absensi.pantau');
+// --- AREA DOSEN ---
+Route::prefix('dosen')->name('dosen.')->group(function () {
     
-    Route::get('/kelas/create', [AdminController::class, 'createKelas'])->name('kelas.create');
-    // Rute untuk FORM TAMBAH KELAS (Ini yang harusnya dipanggil tombol biru)
-    Route::get('/kelas/tambah', [AdminController::class, 'createKelasForm'])->name('kelas.tambah');
+    // Dashboard & Rekap
+    Route::get('/dashboard', [DosenController::class, 'index'])->name('dashboard');
+    Route::get('/rekap', [DosenController::class, 'rekapDosen'])->name('rekap');
+    Route::get('/rekap/export/{id}', [DosenController::class, 'exportExcel'])->name('rekap.export');
+    Route::get('/dosen/rekap/export-semester/{id}', [DosenController::class, 'exportSemester'])->name('dosen.rekap.export_semester');
     
-    // Rute untuk PROSES SIMPAN KELAS
-    Route::post('/kelas/store', [AdminController::class, 'storeKelas'])->name('kelas.store');
+    // Pengelolaan Kelas
+    Route::get('/kelas/tambah', [DosenController::class, 'createKelas'])->name('kelas.tambah');
+    Route::post('/kelas/store', [DosenController::class, 'storeKelas'])->name('kelas.store');
+    Route::get('/kelas/edit/{id}', [DosenController::class, 'editKelas'])->name('kelas.edit');
+    Route::put('/kelas/update/{id}', [DosenController::class, 'update'])->name('kelas.update');
+    Route::delete('/hapus-kelas/{id}', [DosenController::class, 'destroyKelas'])->name('hapus_kelas');
 
-    // Rute untuk BUKA ABSENSI (Halaman yang muncul di image_62a23f)
-    Route::get('/absensi/buka', [AdminController::class, 'bukaAbsenPage'])->name('absensi.buka');
-    Route::post('/dosen/absensi/store', [AdminController::class, 'storeSesi'])->name('dosen.absensi.store');
-    // Rute untuk menampilkan form (GET)
-Route::get('/dosen/kelas/buka/{id}', [AdminController::class, 'bukaAbsen'])->name('dosen.kelas.buka');
-
-// Rute untuk memproses simpan sesi (POST)
-Route::post('/dosen/sesi/store', [AdminController::class, 'storeSesi'])->name('dosen.sesi.store');
-    });
-
+    // --- BAGIAN SESI ABSENSI (PENYEBAB TOMBOL QR TIDAK JALAN) ---
+    Route::get('/buka-absen/{id}', [DosenController::class, 'bukaAbsen'])->name('buka_absen');
+    Route::post('/sesi/store', [DosenController::class, 'storeSesi'])->name('sesi.store'); // <-- PENTING: Harus POST
+    Route::get('/show-qr/{id}', [DosenController::class, 'showQR'])->name('show_qr'); // <-- PENTING: Untuk nampilin QR
+    
+});
 
     // --- AREA MAHASISWA ---
     Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
-        Route::post('/scan', [AdminController::class, 'scanAbsensi'])->name('absensi.scan');
         Route::get('/rekap', [AdminController::class, 'rekapAbsensi'])->name('rekap');
+        Route::get('/mahasiswa/rekap/export/{id}', [MahasiswaController::class, 'exportSemesterMahasiswa'])->name('mahasiswa.rekap.export');
+        
+        // Fitur Download Excel Mahasiswa
+        Route::get('/rekap/export', [AdminController::class, 'exportExcelMahasiswa'])->name('rekap.export');
+        
+        Route::post('/scan', [AdminController::class, 'scanAbsensi'])->name('absensi.scan');
     });
 
-    // Alias global untuk scan absensi agar tombol di blade tidak error
-    Route::post('/absensi/scan', [AdminController::class, 'scanAbsensi'])->name('absensi.scan');
-    Route::get('/settings', [AdminController::class, 'settingsShow'])->name('settings');
-    // Tambahkan di dalam group dosen atau admin
-Route::get('/settings', [AdminController::class, 'settingsShow'])->name('settings.show');
-
+    // Global Alias (Optional)
+    Route::post('/absensi/scan-global', [AdminController::class, 'scanAbsensi'])->name('absensi.scan.global');
 });

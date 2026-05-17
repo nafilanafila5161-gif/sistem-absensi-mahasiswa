@@ -46,12 +46,9 @@
     <a class="nav-link text-white {{ request()->routeIs('dosen.dashboard') ? 'active' : '' }}" href="{{ route('dosen.dashboard') }}">
         <i class="bi bi-speedometer2 me-2"></i> Dashboard Dosen
     </a>
-    <a class="nav-link text-white {{ request()->routeIs('dosen.kelas.create') ? 'active' : '' }}" href="{{ route('dosen.kelas.create') }}">
-        <i class="bi bi-plus-circle me-2"></i> Buka Absensi Baru
-    </a>
-    <a class="nav-link text-white {{ request()->routeIs('dosen.kelas.store') ? 'active' : '' }}" href="{{ route('dosen.kelas.store') }}">
-        <i class="bi bi-journal-text me-2"></i> Riwayat Kelas
-    </a>
+
+    
+
     <a class="nav-link text-white {{ request()->routeIs('dosen.rekap') ? 'active' : '' }}" href="{{ route('dosen.rekap') }}">
         <i class="fas fa-fw fa-table me-2"></i> Rekap Absensi Mahasiswa
     </a>
@@ -86,7 +83,28 @@
             @yield('content')
         </main>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @if(session('success'))
+<script>
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: "{{ session('success') }}",
+            showConfirmButton: false,
+            timer: 2000
+        });
+    @endif
 
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: "{{ session('error') }}",
+        });
+    @endif
+</script>
+@endif
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

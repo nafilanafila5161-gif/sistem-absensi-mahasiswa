@@ -11,22 +11,15 @@ class SesiAbsensi extends Model
     protected $table = 'sesi_absensi'; 
 
     // Tambahkan ini agar kolom lokasi bisa disimpan
-    protected $fillable = [
-        'kelas_id', 
-        'qr_token', 
-        'waktu_mulai', 
-        'waktu_selesai', 
-        'is_active',
-        'latitude',      // Tambahkan ini
-        'longitude',     // Tambahkan ini
-        'radius_meter'   // Tambahkan ini
-    ];
-
+   protected $fillable = [
+    'kelas_id', 'qr_token', 'waktu_mulai', 'waktu_selesai', 
+    'is_active', 'latitude', 'longitude', 'radius'
+];
     // Relasi ke Kelas
-    public function kelas()
-    {
-        return $this->belongsTo(Kelas::class);
-    }
+   public function kelas()
+{
+    return $this->belongsTo(Kelas::class, 'kelas_id');
+}
 
     // Relasi ke daftar hadir
     public function absensi()

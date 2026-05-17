@@ -9,51 +9,52 @@
                     <h5 class="mb-0"><i class="fas fa-clock"></i> Aktifkan Sesi Absensi</h5>
                 </div>
                 <div class="card-body">
-                    {{-- Tampilkan informasi kelas jika $kelas tersedia --}}
                     @if(isset($kelas))
-                        <div class="mb-4">
-                            <h6 class="text-muted text-uppercase small fw-bold">Informasi Kelas</h6>
-                            <div class="alert alert-info border-0 shadow-sm">
-                                <div class="mb-1">
-                                    <strong>Mata Kuliah:</strong> {{ $kelas->mataKuliah->nama_mk ?? 'Tidak Ada Data' }}
-                                </div>
-                                <div>
-                                    <strong>Kode Kelas:</strong> {{ $kelas->kode_kelas ?? '-' }}
+                        <div class="alert alert-info">
+                            <h6>INFORMASI KELAS</h6>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    {{-- Mengambil nama_mk dari data kelas yang dikirim controller --}}
+                                    <p><strong>Mata Kuliah:</strong> {{ $kelas->nama_mk }}</p>
+                                    <p><strong>Kode Kelas:</strong> {{ $kelas->kode_kelas }}</p>
                                 </div>
                             </div>
-                        </div>      
+                        </div>
 
-                        <form action="{{ route('dosen.sesi.store') }}" method="POST" id="formBukaAbsen">
+                        <form action="{{ route('dosen.sesi.store') }}" method="POST">
                             @csrf
-                            {{-- Data Hidden --}}
                             <input type="hidden" name="kelas_id" value="{{ $kelas->id }}">
+                            {{-- Perbaikan: ID harus sesuai dengan yang dipanggil di script --}}
                             <input type="hidden" name="latitude" id="latitude">
                             <input type="hidden" name="longitude" id="longitude">
 
                             <div class="mb-3">
-                                <label for="menit_aktif" class="form-label fw-bold">Durasi QR Berlaku (Menit)</label>
+                                <label class="form-label">Durasi QR (Menit)</label>
                                 <div class="input-group">
-                                    <input type="number" name="menit_aktif" id="menit_aktif" class="form-control" 
-                                           placeholder="Contoh: 15" min="1" required value="15">
+                                    <input type="number" name="durasi" class="form-control" value="15" required>
                                     <span class="input-group-text">Menit</span>
-                                </div>
-                                <div id="locationStatus" class="form-text text-warning mt-2">
-                                    <i class="fas fa-map-marker-alt"></i> Sedang mengambil lokasi GPS...
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <label for="materi" class="form-label fw-bold">Materi Perkuliahan (Opsional)</label>
-                                <textarea name="materi" id="materi" class="form-control" rows="3" 
-                                          placeholder="Masukkan ringkasan materi hari ini..."></textarea>
+                                <label class="form-label">Radius Absensi (Meter)</label>
+                                <div class="input-group">
+                                    <input type="number" name="radius" class="form-control" value="50" required>
+                                    <span class="input-group-text">Meter</span>
+                                </div>
+                                <small class="text-muted"><i class="bi bi-geo-alt"></i> Jarak maksimal mahasiswa dari posisi Anda.</small>
                             </div>
 
-                            <div class="d-grid gap-2 mt-4">
-                                <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg" disabled>
-                                    <i class="fas fa-play-circle"></i> Buka Sesi & Tampilkan QR
-                                </button>
-                                <a href="{{ route('dosen.dashboard') }}" class="btn btn-light">Batal</a>
+                            {{-- Elemen Status Lokasi --}}
+                            <div id="locationStatus" class="mb-3 small text-warning">
+                                <i class="fas fa-spinner fa-spin"></i> Sedang mengambil lokasi GPS...
                             </div>
+
+                            <button type="submit" id="btnSubmit" class="btn btn-primary w-100" disabled>
+                                <i class="bi bi-play-circle"></i> Buka Sesi & Tampilkan QR
+                            </button>
+                            
+                            <a href="{{ route('dosen.dashboard') }}" class="btn btn-light w-100 mt-2">Batal</a>
                         </form>
                     @else
                         <div class="alert alert-danger">
@@ -83,17 +84,17 @@
                     lngInput.value = position.coords.longitude;
                     
                     statusText.innerHTML = '<i class="fas fa-check-circle text-success"></i> Lokasi berhasil dikunci.';
-                    submitBtn.disabled = false; // Tombol baru bisa diklik setelah GPS dapat
+                    submitBtn.disabled = false; // Tombol aktif setelah GPS terkunci
                 },
                 function(error) {
-                    // Gagal ambil lokasi
-                    statusText.innerHTML = '<i class="fas fa-exclamation-triangle text-danger"></i> Gagal mengambil lokasi. Pastikan GPS aktif dan izinkan browser.';
-                    alert("Error: " + error.message + ". Mohon izinkan akses lokasi agar absensi valid.");
+                    // Gagal ambil lokasi karena izin ditolak atau GPS mati
+                    statusText.innerHTML = '<i class="fas fa-exclamation-triangle text-danger"></i> Akses lokasi ditolak. Harap izinkan browser mengakses GPS.';
+                    alert("Gagal mengambil lokasi: " + error.message);
                 },
                 { enableHighAccuracy: true }
             );
         } else {
-            statusText.innerHTML = "Browser Anda tidak mendukung Geolocation.";
+            statusText.innerHTML = "Browser Anda tidak mendukung fitur lokasi.";
         }
     });
 </script>

@@ -8,11 +8,17 @@
     </button>
 </div>
 
+{{-- Notifikasi Sukses via SweetAlert (Jika belum ada di Layout) --}}
 @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: "{{ session('success') }}",
+            showConfirmButton: false,
+            timer: 2000
+        });
+    </script>
 @endif
 
 <div class="card card-custom shadow-sm border-0">
@@ -34,6 +40,7 @@
     <div class="card-body p-4">
         <div class="tab-content" id="userTabContent">
             
+            {{-- TAB DOSEN --}}
             <div class="tab-pane fade show active" id="dosen" role="tabpanel">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
@@ -50,12 +57,14 @@
                                 <td>{{ $user->name }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td class="text-center">
-                                    <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST">
+                                    {{-- Form Hapus --}}
+                                    <form id="delete-form-{{ $user->id }}" action="{{ route('admin.users.destroy', $user->id) }}" method="POST" style="display: none;">
                                         @csrf @method('DELETE')
-                                        <button class="btn btn-outline-danger btn-sm" onclick="return confirm('Hapus Dosen ini?')">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
                                     </form>
+                                    {{-- Tombol Hapus memicu SweetAlert --}}
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDelete('{{ $user->id }}', 'Dosen')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                             @empty
@@ -66,6 +75,7 @@
                 </div>
             </div>
 
+            {{-- TAB MAHASISWA --}}
             <div class="tab-pane fade" id="mahasiswa" role="tabpanel">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
@@ -82,12 +92,12 @@
                                 <td>{{ $user->name }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td class="text-center">
-                                    <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST">
+                                    <form id="delete-form-{{ $user->id }}" action="{{ route('admin.users.destroy', $user->id) }}" method="POST" style="display: none;">
                                         @csrf @method('DELETE')
-                                        <button class="btn btn-outline-danger btn-sm" onclick="return confirm('Hapus Mahasiswa ini?')">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
                                     </form>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDelete('{{ $user->id }}', 'Mahasiswa')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
                             @empty
@@ -97,11 +107,11 @@
                     </table>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
 
+{{-- MODAL TAMBAH USER --}}
 <div class="modal fade" id="modalTambahUser" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog shadow-lg">
         <form action="{{ route('admin.users.store') }}" method="POST">
@@ -139,4 +149,25 @@
         </form>
     </div>
 </div>
+
+{{-- SCRIPT SWEETALERT UNTUK DELETE --}}
+<script>
+function confirmDelete(id, roleLabel) {
+    Swal.fire({
+        title: 'Hapus ' + roleLabel + '?',
+        text: "Data ini akan dihapus secara permanen dan tidak bisa dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-' + id).submit();
+        }
+    })
+}
+</script>
 @endsection

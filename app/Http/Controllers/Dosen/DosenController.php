@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Dosen;
 
+use App\Models\Kelas;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Kelas;
 use App\Models\SesiAbsensi;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -20,58 +20,50 @@ class DosenController extends Controller
     /**
      * Menampilkan daftar kelas yang diampu dosen
      */
-   public function index(){
-    $dosenId = Auth::user()->dosen->id;
-    $daftar_kelas = Kelas::with('mataKuliah')->where('dosen_id', $dosenId)->get();
-    
-    // Gunakan 'daftar_kelas' agar sesuai dengan file blade dashboard sebelumnya
+public function index()
+{
+    // Mengambil ID user Nana (ID 2) secara eksplisit
+    $id_user = auth()->id();
+
+    // Mengambil semua kelas yang memiliki dosen_id = 2
+    $daftar_kelas = \App\Models\Kelas::where('dosen_id', $id_user)->get();
+
+    // Kirim variabel ke view dashboard
     return view('dosen.dashboard', compact('daftar_kelas'));
 }
 
     /**
      * Membuat sesi absensi baru (Buka Absensi)
      */
-    public function storeSesi(Request $request)
-    {
-        $request->validate([
-            'kelas_id' => 'required',
-            'menit_aktif' => 'required|integer', // Durasi absensi dibuka
-            'materi' => 'nullable|string'
-        ]);
+  public function storeSesi(Request $request) {
+    $request->validate([
+        'durasi' => 'required|numeric',
+        'radius' => 'required|numeric',
+    ]);
 
-        // Generate Token QR Unik[cite: 1, 2]
-        $qrToken = Str::random(40); 
-        
-        $sesi = SesiAbsensi::create([
-            'kelas_id' => $request->kelas_id,
-            'qr_token' => $qrToken,
-            'waktu_mulai' => Carbon::now(),
-            'waktu_selesai' => Carbon::now()->addMinutes($request->menit_aktif),
-            'is_active' => true,
-            'materi' => $request->materi
-        ]);
+    $sesi = SesiAbsensi::create([
+    'kelas_id'      => $request->kelas_id,
+    'qr_token'      => \Illuminate\Support\Str::random(40),
+    'latitude'      => $request->latitude,
+    'longitude'     => $request->longitude,
+    'radius'        => $request->radius,
+    'is_active'     => 1, // Sesuai kolom di DB
+    'waktu_mulai'   => now(),
+    'waktu_selesai' => now()->addMinutes((int)$request->durasi), // Sesuai kolom di DB
+]);
 
-        return redirect()->route('dosen.show_qr', $sesi->id);
-    }
+    return redirect()->route('dosen.show_qr', $sesi->id);
+}
 
     /**
      * Menampilkan QR Code untuk di-scan mahasiswa
      */
     public function showQR($id)
-    {
-        $sesi = SesiAbsensi::findOrFail($id);
-        
-        // Cek apakah sesi masih berlaku secara waktu
-        if (Carbon::now()->gt($sesi->waktu_selesai)) {
-            $sesi->update(['is_active' => false]);
-        }
-
-        // Generate QR Code menggunakan library simplesoftwareio/simple-qrcode
-        $qrcode = QrCode::size(400)->generate($sesi->qr_token);
-
-        return view('dosen.show_qr', compact('qrcode', 'sesi'));
-    }
-
+{
+    $sesi = SesiAbsensi::findOrFail($id);
+   $qrcode = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(300)->generate($sesi->qr_token);
+    return view('dosen.show_qr', compact('qrcode', 'sesi'));
+}
     // Menampilkan form tambah kelas
 public function createKelas()
 {
@@ -131,6 +123,49 @@ public function exportExcel($id)
 {
     // Pastikan $id adalah ID Kelas
     return Excel::download(new AbsensiExport($id), 'rekap_absensi_kelas_'.$id.'.xlsx');
+}
+
+// Tambahkan fungsi ini untuk memperbaiki error image_189177.jpg
+public function rekapDosen()
+{
+    $id_user = auth()->id();
+
+    // Pastikan menggunakan whereHas ke 'sesi.kelas' karena tabel absensi tidak punya kelas_id
+    $rekap = \App\Models\Absensi::with(['sesi.kelas.mataKuliah', 'user'])
+        ->whereHas('sesi.kelas', function($query) use ($id_user) {
+            $query->where('dosen_id', $id_user);
+        })
+        ->get();
+
+    // Variabel $rekap dikirim ke view agar tidak 'Undefined'
+    return view('dosen.rekap', compact('rekap'));
+}
+// Tambahkan juga fungsi hapus jika belum ada
+public function destroyKelas($id)
+{
+    $kelas = \App\Models\Kelas::findOrFail($id);
+    $kelas->delete();
+    return redirect()->back()->with('success', 'Kelas berhasil dihapus');
+}
+
+public function exportSemester($id) 
+{
+    // 1. Ambil data absensi berdasarkan Kelas (Satu Semester)
+    $data = Absensi::with(['sesi.kelas.mataKuliah', 'user'])
+        ->whereHas('sesi', function($q) use ($id) {
+            $q->where('kelas_id', $id);
+        })
+        ->get();
+
+    // 2. Cek jika data kosong agar tidak error saat export
+    if ($data->isEmpty()) {
+        return back()->with('error', 'Belum ada data absensi untuk kelas ini.');
+    }
+
+    // 3. Logika export ke Excel (Contoh sederhana)
+    // Di sini Anda bisa menggunakan library seperti Maatwebsite/Excel
+    // atau sekadar mengembalikan data ke view khusus Excel
+    return view('dosen.export_excel', compact('data'));
 }
 
 }
