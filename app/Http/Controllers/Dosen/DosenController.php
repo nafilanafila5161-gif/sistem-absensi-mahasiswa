@@ -12,7 +12,7 @@ use Carbon\Carbon;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Exports\AbsensiExport;
 use Maatwebsite\Excel\Facades\Excel;
-
+use App\Models\Absensi;
 
 class DosenController extends Controller
 {
