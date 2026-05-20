@@ -221,7 +221,7 @@
                                         @csrf
                                         @method('DELETE')
                                     </form>
-                                    <button type="button" class="btn btn-sm btn-action-hapus d-inline-flex align-items-center gap-1 px-2.5 py-1.5 rounded-3 shadow-sm" onclick="confirmDelete({{ $item->id }})">
+                                    <button type="button" class="btn btn-sm btn-action-hapus d-inline-flex align-items-center gap-1 px-2.5 py-1.5 rounded-3 shadow-sm" onclick="confirmDelete('{{ $item->id }}')">
                                         <i class="bi bi-trash3"></i> Hapus
                                     </button>
                                 </div>

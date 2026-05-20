@@ -130,14 +130,14 @@ public function rekapDosen()
 {
     $id_user = auth()->id();
 
-    // Pastikan menggunakan whereHas ke 'sesi.kelas' karena tabel absensi tidak punya kelas_id
-    $rekap = \App\Models\Absensi::with(['sesi.kelas.mataKuliah', 'user'])
+    // PERBAIKAN: Hanya memanggil 'sesi.kelas' dan 'user' saja agar tidak crash
+    $rekap = \App\Models\Absensi::with(['sesi.kelas', 'user'])
         ->whereHas('sesi.kelas', function($query) use ($id_user) {
             $query->where('dosen_id', $id_user);
         })
         ->get();
 
-    // Variabel $rekap dikirim ke view agar tidak 'Undefined'
+    // Kirim data rekap yang aman ke view dosen
     return view('dosen.rekap', compact('rekap'));
 }
 // Tambahkan juga fungsi hapus jika belum ada
