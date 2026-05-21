@@ -189,7 +189,7 @@
                             <th>Mata Kuliah</th>
                             <th>Kode Kelas</th>
                             <th>Hari</th>
-                            <th>SKS</th>
+                            <th>Jam</th><th>SKS</th>
                             <th class="text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -202,6 +202,11 @@
                                 <span class="d-inline-flex align-items-center gap-1">
                                     <i class="bi bi-calendar3 text-muted small"></i> {{ $item->hari }}
                                 </span>
+                            </td>
+                            <td>
+                                <i class="bi bi-clock me-1"></i> 
+                                {{ \Carbon\Carbon::parse($item->jam_mulai)->format('H:i') }} - 
+                                {{ \Carbon\Carbon::parse($item->jam_selesai)->format('H:i') }} WIB
                             </td>
                             <td>
                                 <span class="badge bg-light text-secondary border border-secondary border-opacity-10 px-2.5 py-1.5 fw-semibold">

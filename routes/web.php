@@ -54,19 +54,23 @@ Route::prefix('dosen')->name('dosen.')->group(function () {
     Route::get('/dashboard', [DosenController::class, 'index'])->name('dashboard');
     Route::get('/rekap', [DosenController::class, 'rekapDosen'])->name('rekap');
     Route::get('/rekap/export/{id}', [DosenController::class, 'exportExcel'])->name('rekap.export');
-    Route::get('/dosen/rekap/export-semester/{id}', [DosenController::class, 'exportSemester'])->name('dosen.rekap.export_semester');
+    Route::get('/rekap/export-semester/{id}', [DosenController::class, 'exportSemester'])->name('rekap.export_semester');
     
     // Pengelolaan Kelas
     Route::get('/kelas/tambah', [DosenController::class, 'createKelas'])->name('kelas.tambah');
     Route::post('/kelas/store', [DosenController::class, 'storeKelas'])->name('kelas.store');
     Route::get('/kelas/edit/{id}', [DosenController::class, 'editKelas'])->name('kelas.edit');
-    Route::put('/kelas/update/{id}', [DosenController::class, 'update'])->name('kelas.update');
+    
+    // PERBAIKAN: Cukup satu baris ini untuk update kelas
+    Route::put('/kelas/update/{id}', [DosenController::class, 'updateKelas'])->name('kelas.update'); 
+    
     Route::delete('/hapus-kelas/{id}', [DosenController::class, 'destroyKelas'])->name('hapus_kelas');
 
-    // --- BAGIAN SESI ABSENSI (PENYEBAB TOMBOL QR TIDAK JALAN) ---
+    // Sesi Absensi
     Route::get('/buka-absen/{id}', [DosenController::class, 'bukaAbsen'])->name('buka_absen');
-    Route::post('/sesi/store', [DosenController::class, 'storeSesi'])->name('sesi.store'); // <-- PENTING: Harus POST
-    Route::get('/show-qr/{id}', [DosenController::class, 'showQR'])->name('show_qr'); // <-- PENTING: Untuk nampilin QR
+    Route::post('/sesi/store', [DosenController::class, 'storeSesi'])->name('sesi.store'); 
+    Route::get('/show-qr/{id}', [DosenController::class, 'showQR'])->name('show_qr');
+    
     
 });
 
