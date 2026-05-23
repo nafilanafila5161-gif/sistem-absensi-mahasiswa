@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Exports;
 
 use App\Models\Absensi;
@@ -33,16 +34,23 @@ class AbsensiExport implements FromCollection, WithHeadings, WithMapping
     // Memetakan data dari database ke kolom Excel yang sesuai
     public function map($data): array
     {
+        // PERBAIKAN AMAN: Mengubah string waktu menjadi objek Carbon sebelum di-format
+        $waktuMulai = \Carbon\Carbon::parse($data->sesi->waktu_mulai);
+        $waktuSelesai = \Carbon\Carbon::parse($data->sesi->waktu_selesai);
+        
+        // Format waktu absen saat mahasiswa melakukan scanning
+        $waktuAbsen = $data->scan_at ? \Carbon\Carbon::parse($data->scan_at)->format('d-m-Y H:i') : '-';
+
         return [
-            $data->sesi->kelas->dosen->name ?? '-',      // Nama Dosen
-            $data->sesi->kelas->kode_kelas ?? '-',      // Kode Kelas
-            $data->sesi->kelas->nama_mk ?? '-',         // Nama Mata Kuliah
-            $data->sesi->waktu_mulai->translatedFormat('l'), // Hari (Senin, Selasa, dsb)
-            $data->sesi->waktu_mulai->format('H:i'),    // Jam Mulai
-            $data->sesi->waktu_mulai->diffInMinutes($data->sesi->waktu_selesai), // Durasi
-            $data->user->name ?? $data->mahasiswa->nama, // Nama Mahasiswa
-            $data->created_at->format('d/m/Y H:i'),     // Waktu Absen
-            'Hadir'                                     // Status
+            $data->sesi->kelas->dosen->name ?? '-',                      // Nama Dosen
+            $data->sesi->kelas->kode_kelas ?? '-',                       // Kode Kelas
+            $data->sesi->kelas->nama_mk ?? '-',                          // Nama Mata Kuliah
+            $waktuMulai->translatedFormat('l'),                          // Hari (Senin, Selasa, dsb)
+            $waktuMulai->format('H:i'),                                  // Jam Mulai
+            $waktuMulai->diffInMinutes($waktuSelesai),                   // Durasi dalam menit
+            $data->mahasiswa->nama ?? $data->mahasiswa->user->name ?? '-', // Nama Mahasiswa (mencari alternatif aman)
+            $waktuAbsen,                                                 // Waktu Absen (Tanggal & Jam scan)
+            ucfirst($data->status ?? 'alpha')                            // Status (Hadir, Terlambat, Alpha) dengan huruf kapital depan
         ];
     }
 }

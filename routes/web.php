@@ -26,10 +26,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [AdminController::class, 'profile'])->name('profile.show');
    
     // Rute untuk buka halaman edit (GET)
-Route::get('/profile/edit', [AdminController::class, 'editProfile'])->name('profile.edit');
+    Route::get('/profile/edit', [AdminController::class, 'editProfile'])->name('profile.edit');
 
-// Rute untuk simpan data (POST)
-Route::post('/profile/update', [AdminController::class, 'updateProfile'])->name('profile.update');
+    // Rute untuk simpan data (POST)
+    Route::post('/profile/update', [AdminController::class, 'updateProfile'])->name('profile.update');
     
     
     // Settings (Menyatukan alias agar tidak error)
@@ -47,32 +47,33 @@ Route::post('/profile/update', [AdminController::class, 'updateProfile'])->name(
         Route::get('/rekap/export', [AdminController::class, 'exportExcelAdmin'])->name('rekap.export');
     });
 
-// --- AREA DOSEN ---
-Route::prefix('dosen')->name('dosen.')->group(function () {
-    
-    // Dashboard & Rekap
-    Route::get('/dashboard', [DosenController::class, 'index'])->name('dashboard');
-    Route::get('/rekap', [DosenController::class, 'rekapDosen'])->name('rekap');
-    Route::get('/rekap/export/{id}', [DosenController::class, 'exportExcel'])->name('rekap.export');
-    Route::get('/rekap/export-semester/{id}', [DosenController::class, 'exportSemester'])->name('rekap.export_semester');
-    
-    // Pengelolaan Kelas
-    Route::get('/kelas/tambah', [DosenController::class, 'createKelas'])->name('kelas.tambah');
-    Route::post('/kelas/store', [DosenController::class, 'storeKelas'])->name('kelas.store');
-    Route::get('/kelas/edit/{id}', [DosenController::class, 'editKelas'])->name('kelas.edit');
-    
-    // PERBAIKAN: Cukup satu baris ini untuk update kelas
-    Route::put('/kelas/update/{id}', [DosenController::class, 'updateKelas'])->name('kelas.update'); 
-    
-    Route::delete('/hapus-kelas/{id}', [DosenController::class, 'destroyKelas'])->name('hapus_kelas');
+    // --- AREA DOSEN ---
+    Route::prefix('dosen')->name('dosen.')->group(function () {
+        
+        // Dashboard & Rekap
+        Route::get('/dashboard', [DosenController::class, 'index'])->name('dashboard');
+        Route::get('/rekap', [DosenController::class, 'rekapDosen'])->name('rekap');
+        Route::get('/rekap/export/{id}', [DosenController::class, 'exportExcel'])->name('rekap.export');
+        Route::get('/rekap/export-semester/{id}', [DosenController::class, 'exportSemester'])->name('rekap.export_semester');
+        
+        // PERBAIKAN: Menambahkan route untuk unduh rekap per pertemuan mahasiswa
+        Route::get('/rekap/export-pertemuan/{id}', [DosenController::class, 'exportPertemuan'])->name('rekap.export_pertemuan');
+        
+        // Pengelolaan Kelas
+        Route::get('/kelas/tambah', [DosenController::class, 'createKelas'])->name('kelas.tambah');
+        Route::post('/kelas/store', [DosenController::class, 'storeKelas'])->name('kelas.store');
+        Route::get('/kelas/edit/{id}', [DosenController::class, 'editKelas'])->name('kelas.edit');
+        
+        // Cukup satu baris ini untuk update kelas
+        Route::put('/kelas/update/{id}', [DosenController::class, 'updateKelas'])->name('kelas.update'); 
+        
+        Route::delete('/hapus-kelas/{id}', [DosenController::class, 'destroyKelas'])->name('hapus_kelas');
 
-    // Sesi Absensi
-    Route::get('/buka-absen/{id}', [DosenController::class, 'bukaAbsen'])->name('buka_absen');
-    Route::post('/sesi/store', [DosenController::class, 'storeSesi'])->name('sesi.store'); 
-    Route::get('/show-qr/{id}', [DosenController::class, 'showQR'])->name('show_qr');
-    
-    
-});
+        // Sesi Absensi
+        Route::get('/buka-absen/{id}', [DosenController::class, 'bukaAbsen'])->name('buka_absen');
+        Route::post('/sesi/store', [DosenController::class, 'storeSesi'])->name('sesi.store'); 
+        Route::get('/show-qr/{id}', [DosenController::class, 'showQR'])->name('show_qr');
+    });
 
     // --- AREA MAHASISWA ---
     Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
