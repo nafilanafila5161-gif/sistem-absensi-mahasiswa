@@ -22,7 +22,7 @@ class DosenController extends Controller
      */
     public function index()
     {
-        // Mengambil ID akun yang sedang login secara mutlak (Nilainya = 2)
+        // Mengambil ID akun yang sedang login secara mutlak
         $id_user = Auth::id();
 
         // Mencari kelas yang kolom dosen_id-nya berisi angka ID user tersebut
@@ -33,7 +33,7 @@ class DosenController extends Controller
     }
 
     /**
-     * Membuat sesi absensi baru (Buka Absensi)
+     * Membuat sesi absensi baru (Buka Absensi via AJAX Pop-up)
      */
     public function storeSesi(Request $request)
     {
@@ -45,7 +45,7 @@ class DosenController extends Controller
             'longitude'=> 'required',
         ]);
 
-        // LANGSUNG BUAT SESI TANPA PENGECEKAN JAM KULIAH LAMA
+        // Membuat data sesi absensi baru
         $sesi = SesiAbsensi::create([
             'kelas_id'      => $request->kelas_id,
             'qr_token'      => Str::random(40),
@@ -57,16 +57,20 @@ class DosenController extends Controller
             'waktu_selesai' => now()->addMinutes((int)$request->durasi),
         ]);
 
-        // Arahkan ke fungsi showQR
-        return redirect()->route('dosen.show_qr', $sesi->id);
+        // FIXED: Mengembalikan respon JSON untuk dibaca oleh AJAX Javascript di halaman view
+        return response()->json([
+            'status'   => 'success',
+            'qr_token' => $sesi->qr_token,
+            'nama_mk'  => $sesi->kelas->nama_mk ?? 'Mata Kuliah',
+            'kode_mk'  => $sesi->kelas->kode_kelas ?? 'Kode Kelas'
+        ]);
     }
 
     /**
-     * Menampilkan QR Code untuk di-scan mahasiswa
+     * Menampilkan QR Code untuk di-scan mahasiswa (Fallback jika dibutuhkan)
      */
     public function showQR($id)
     {
-        // PERBAIKAN: Mengubah SesiAbsening menjadi SesiAbsensi
         $sesi = SesiAbsensi::findOrFail($id);
         $qrcode = QrCode::size(300)->generate($sesi->qr_token);
         return view('dosen.show_qr', compact('qrcode', 'sesi'));
@@ -179,7 +183,7 @@ class DosenController extends Controller
     {
         $id_user = Auth::id();
 
-        // PERBAIKAN: Menambahkan strict validation whereHas('sesi') agar aman dari data corrupt
+        // Validasi strict ke relasi tabel absensi
         $rekap = Absensi::with(['sesi.kelas', 'user'])
             ->whereHas('sesi', function($query) {
                 $query->whereNotNull('kelas_id');
@@ -218,7 +222,6 @@ class DosenController extends Controller
             return back()->with('error', 'Belum ada data absensi untuk kelas ini.');
         }
 
-        // PERBAIKAN UTAMA: Mengubah return view menjadi Excel::download agar langsung terunduh ke laptop
         return Excel::download(new \App\Exports\AbsensiExport($id), 'rekap_absensi_semester_kelas_'.$id.'.xlsx');
     }
 
@@ -227,7 +230,6 @@ class DosenController extends Controller
      */
     public function exportPertemuan($id)
     {
-        // Mengunduh rekap berdasarkan ID Sesi Absensi menggunakan excel library
         return Excel::download(new \App\Exports\AbsensiExport($id), 'rekap_absen_pertemuan_'.$id.'.xlsx');
     }
 }
