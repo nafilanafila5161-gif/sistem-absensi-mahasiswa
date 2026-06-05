@@ -44,20 +44,26 @@ class MahasiswaController extends Controller
     return view('Mahasiswa.rekap', compact('rekap'));
 }
 
+
 public function rekap()
 {
+    // 1. Ambil data mahasiswa berdasarkan user yang login
     $mahasiswa = Mahasiswa::where('user_id', Auth::id())->first();
 
-    // Ambil data absensi mahasiswa tersebut
+    if (!$mahasiswa) {
+        $rekap = collect();
+        return view('Mahasiswa.rekap', compact('rekap'));
+    }
+
+    // 2. Ambil data absensi, cukup hubungkan sampai tabel kelas (jangan panggil mataKuliah)
     $rekap = Absensi::where('mahasiswa_id', $mahasiswa->id)
-                    ->with('sesi.kelas.mataKuliah')
+                    ->with(['sesi', 'sesi.kelas']) 
                     ->orderBy('scan_at', 'desc')
                     ->get();
 
-    // Pastikan diarahkan ke folder Mahasiswa (M Kapital) dan file rekap
+    // 3. Lempar ke view rekap
     return view('Mahasiswa.rekap', compact('rekap'));
 }
-
     public function exportExcel()
     {
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\MahasiswaAbsensiExport, 'riwayat-absensi.xlsx');

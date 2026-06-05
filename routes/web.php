@@ -75,18 +75,22 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/show-qr/{id}', [DosenController::class, 'showQR'])->name('show_qr');
     });
 
-    // --- AREA MAHASISWA ---
-    Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
-        Route::get('/rekap', [AdminController::class, 'rekapAbsensi'])->name('rekap');
-        Route::get('/mahasiswa/rekap/export/{id}', [MahasiswaController::class, 'exportSemesterMahasiswa'])->name('mahasiswa.rekap.export');
-        
-        // Fitur Download Excel Mahasiswa
-        Route::get('/rekap/export', [AdminController::class, 'exportExcelMahasiswa'])->name('rekap.export');
-        
-        Route::post('/scan', [AdminController::class, 'scanAbsensi'])->name('absensi.scan');
-    });
-
+   // --- AREA MAHASISWA ---
+Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+    
+    // PERBAIKAN PADA BARIS REKAPAN (Buang kata 'mahasiswa' di url dan di name)
+    Route::get('/rekap', [MahasiswaController::class, 'rekap'])->name('rekap');
+    
+    Route::get('/mahasiswa/rekap/export/{id}', [MahasiswaController::class, 'exportSemesterMahasiswa'])->name('mahasiswa.rekap.export');
+    
+    // Fitur Download Excel Mahasiswa
+    Route::get('/rekap/export', [AdminController::class, 'exportExcelMahasiswa'])->name('rekap.export');
+    
+    Route::post('/scan', [AdminController::class, 'scanAbsensi'])->name('absensi.scan');
+});
+    // Tambahkan baris ini di web.php Anda
+Route::get('/mahasiswa/export-semester/{id_kelas}', [App\Http\Controllers\Mahasiswa\MahasiswaController::class, 'exportSemesterMahasiswa'])->name('mahasiswa.export.semester');
     // Global Alias (Optional)
     Route::post('/absensi/scan-global', [AdminController::class, 'scanAbsensi'])->name('absensi.scan.global');
 });

@@ -98,8 +98,8 @@
     }
 </style>
 
+@section('content')
 <div class="container-fluid container-custom-history py-4">
-    <!-- Header Halaman -->
     <div class="mb-4">
         <h3 class="fw-bold m-0" style="color: #0a192f;">
             <i class="bi bi-clock-history me-2" style="color: #0f2b5c;"></i>Riwayat Absensi Saya
@@ -115,28 +115,44 @@
         @endphp
 
         <div class="card card-tech-history mb-4">
-            <!-- Header Panel Kelas -->
-            <div class="card-header header-history-tech d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2.5">
+            <div class="card-header header-history-tech d-flex flex-sm-row justify-content-between align-items-sm-center gap-2.5 py-3">
                 <h6 class="m-0 fw-bold d-flex align-items-center gap-2" style="color: #0a192f;">
                     <i class="bi bi-journal-text text-secondary"></i>
-                    {{ $infoKelas->mataKuliah->nama_mk }} <span class="badge bg-light text-secondary border font-monospace px-2 py-0.5" style="font-size: 0.8rem;">{{ $infoKelas->kode_kelas }}</span>
+                    
+                    {{-- Mengambil nama_mk langsung dari tabel kelas --}}
+                    {{ $infoKelas->nama_mk ?? 'Mata Kuliah' }} 
+                    
+                    <span class="badge bg-light text-secondary border font-monospace px-2 py-0.5" style="font-size: 0.8rem;">
+                        {{ $infoKelas->kode_kelas ?? '-' }}
+                    </span>
                 </h6>
-                
-                {{-- 2. Tombol Download Menggunakan ID Kelas Loop Aktif --}}
-                <a href="{{ route('mahasiswa.rekap.export', ['id' => $kelasId]) }}" class="btn btn-sm btn-tech-emerald d-inline-flex align-items-center gap-1.5 px-3 py-1.5 shadow-sm">
-                    <i class="bi bi-file-earmark-spreadsheet fs-6"></i> Download Rekap Semester
+
+                <a href="/mahasiswa/export-semester/{{ $kelasId }}" class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-1.5 fw-semibold px-3 py-1.5 shadow-sm rounded-2">
+                    <i class="bi bi-file-earmark-excel"></i> Download Excel
                 </a>
             </div>
-            
+
             <div class="card-body px-4 pb-4 pt-3">
-                <!-- Row Metadata Ringkasan Kelas -->
                 <div class="row row-gap-2 mb-3 bg-light p-2.5 rounded-3 border border-light-subtle text-muted small fw-medium mx-0">
-                    <div class="col-sm-4 col-md-3"><i class="bi bi-calendar3 me-1.5 text-secondary"></i><strong>Hari:</strong> {{ $infoKelas->hari }}</div>
-                    <div class="col-sm-4 col-md-3"><i class="bi bi-bookmark-star me-1.5 text-secondary"></i><strong>Beban:</strong> {{ $infoKelas->mataKuliah->sks }} SKS</div>
-                    <div class="col-sm-4 col-md-4"><i class="bi bi-check2-circle me-1.5 text-success"></i><strong>Total Kehadiran:</strong> <span class="text-dark fw-bold">{{ $daftarAbsen->count() }} Pertemuan</span></div>
+                    
+                    <div class="col-sm-4 col-md-3">
+                        <i class="bi bi-calendar3 me-1.5 text-secondary"></i>
+                        <strong>Hari:</strong> {{ $infoKelas->hari ?? '-' }}
+                    </div>
+                    
+                    <div class="col-sm-4 col-md-3">
+                        <i class="bi bi-bookmark-star me-1.5 text-secondary"></i>
+                        <strong>Beban:</strong> {{ $infoKelas->sks ?? '-' }} SKS
+                    </div>
+                    
+                    <div class="col-sm-4 col-md-4">
+                        <i class="bi bi-check2-circle me-1.5 text-success"></i>
+                        <strong>Total Kehadiran:</strong> 
+                        <span class="text-dark fw-bold">{{ $daftarAbsen->count() }} Pertemuan</span>
+                    </div>
+                    
                 </div>
 
-                <!-- Tabel Riwayat Data -->
                 <div class="table-responsive rounded-3 border overflow-hidden shadow-sm">
                     <table class="table table-hover table-history-tech m-0" width="100%" cellspacing="0">
                         <thead>
@@ -175,9 +191,8 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </div>
-    @empty
+
+            </div> </div> @empty
         {{-- Tampilan Placeholder Kosong --}}
         <div class="alert alert-info text-center py-5 border-0 shadow-sm rounded-4" style="background-color: #f0fdfa; color: #0f766e; border-left: 5px solid #0f766e !important;">
             <div class="mb-2">
@@ -187,5 +202,4 @@
             <p class="small mb-0 opacity-75">Sistem belum menemukan adanya rekaman log aktivitas absensi atas akun Anda.</p>
         </div>
     @endforelse
-</div>
-@endsection
+</div> @endsection
