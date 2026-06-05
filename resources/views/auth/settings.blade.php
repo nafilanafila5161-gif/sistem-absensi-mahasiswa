@@ -28,7 +28,7 @@
         left: 0;
         width: 100%;
         height: 4px;
-        background: linear-gradient(90deg, #0a192f, #174694, #00f2fe);
+        background: linear-gradient(90deg, #0a192f, #13418a, #00f2fe);
     }
 
     /* Kartu Keamanan Akun Premium (Menggantikan tema dark biasa) */
@@ -132,7 +132,7 @@
 
 <div class="container container-custom-profile py-4">
     <h3 class="mb-4 fw-bold" style="color: #0a192f;">
-        <i class="bi bi-person-gear me-2" style="color: #0f2b5c;"></i>Pengaturan Akun & Profil
+        <i class="bi bi-person-gear me-2" style="color: #0f2b5c;"></i>info akun
     </h3>
 
     {{-- Notifikasi Sukses --}}

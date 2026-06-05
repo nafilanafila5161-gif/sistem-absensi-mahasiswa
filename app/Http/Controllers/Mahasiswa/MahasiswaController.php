@@ -22,18 +22,41 @@ class MahasiswaController extends Controller
         return view('mahasiswa.dashboard', compact('kelas'));
     }
 
-    public function riwayat()
-    {
-        $mahasiswa = Mahasiswa::where('user_id', Auth::id())->first();
-        
-        // Mengambil log absensi mahasiswa
-        $riwayat = Absensi::where('mahasiswa_id', $mahasiswa->id)
-                            ->with('sesi.kelas.mataKuliah')
-                            ->orderBy('scan_at', 'desc')
-                            ->get();
-
-        return view('mahasiswa.riwayat', compact('riwayat'));
+   public function riwayat()
+{
+    // 1. Ambil data mahasiswa berdasarkan akun user yang sedang login
+    $mahasiswa = Mahasiswa::where('user_id', Auth::id())->first();
+    
+    // Antisipasi jika data mahasiswa tidak ditemukan di database agar aplikasi tidak crash
+    if (!$mahasiswa) {
+        $rekap = collect(); 
+        return view('Mahasiswa.rekap', compact('rekap'));
     }
+    
+    // 2. Ambil log absensi (Ubah nama variabel dari $riwayat menjadi $rekap agar sesuai dengan isi file rekap.blade.php)
+    $rekap = Absensi::where('mahasiswa_id', $mahasiswa->id)
+                    ->with('sesi.kelas.mataKuliah')
+                    ->orderBy('scan_at', 'desc')
+                    ->get();
+
+    // 3. Ubah tujuan view dari 'mahasiswa.riwayat' menjadi 'Mahasiswa.rekap' 
+    // Sesuaikan huruf besar/kecil (Capital Case) nama folder di Laravel Anda ("Mahasiswa")
+    return view('Mahasiswa.rekap', compact('rekap'));
+}
+
+public function rekap()
+{
+    $mahasiswa = Mahasiswa::where('user_id', Auth::id())->first();
+
+    // Ambil data absensi mahasiswa tersebut
+    $rekap = Absensi::where('mahasiswa_id', $mahasiswa->id)
+                    ->with('sesi.kelas.mataKuliah')
+                    ->orderBy('scan_at', 'desc')
+                    ->get();
+
+    // Pastikan diarahkan ke folder Mahasiswa (M Kapital) dan file rekap
+    return view('Mahasiswa.rekap', compact('rekap'));
+}
 
     public function exportExcel()
     {

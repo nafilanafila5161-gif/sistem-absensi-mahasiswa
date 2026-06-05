@@ -65,7 +65,7 @@
                 </div>
                 <ul class="dropdown-menu dropdown-menu-end shadow">
                     <li><a class="dropdown-item" href="{{ route('profile.show') }}"><i class="bi bi-person me-2"></i> Profil Saya</a></li>
-                    <li><a class="dropdown-item" href="{{ route('settings.show') }}"><i class="bi bi-gear me-2"></i> Pengaturan</a></li>
+                    <li><a class="dropdown-item" href="{{ route('settings.show') }}"><i class="bi bi-gear me-2"></i> Info akun</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
                         <form action="{{ route('logout') }}" method="POST">
