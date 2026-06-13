@@ -27,7 +27,7 @@
             margin: auto; 
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45) !important;
             background-color: rgba(255, 255, 255, 0.97); 
-            backdrop-filter: blur(16px); 
+            backdrop-filter: blur(16px);
             overflow: hidden;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
